@@ -12,7 +12,7 @@ android {
     compileSdk = libs.versions.compile.sdk.get().toInt()
 
     defaultConfig {
-        applicationId = "io.github.zyrouge.symphony"
+        applicationId = "io.github.hkhrithik007.Tokai"
         minSdk = libs.versions.min.sdk.get().toInt()
         targetSdk = libs.versions.target.sdk.get().toInt()
 
