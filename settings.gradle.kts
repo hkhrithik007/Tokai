@@ -14,7 +14,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Tokai"
+rootProject.name = "Symphony"
 
 include(":app")
 include(":metaphony")

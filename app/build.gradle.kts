@@ -12,7 +12,7 @@ android {
     compileSdk = libs.versions.compile.sdk.get().toInt()
 
     defaultConfig {
-        applicationId = "io.github.hkhrithik007.Tokai"
+        applicationId = "io.github.zyrouge.symphony"
         minSdk = libs.versions.min.sdk.get().toInt()
         targetSdk = libs.versions.target.sdk.get().toInt()
 
@@ -113,7 +113,6 @@ android {
 }
 
 dependencies {
-    implementation(project(":metaphony"))
     implementation(libs.activity.compose)
     implementation(libs.coil)
     implementation(libs.compose.material.icons.extended)

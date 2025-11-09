@@ -13,7 +13,6 @@ import io.github.zyrouge.symphony.utils.DocumentFileX
 import io.github.zyrouge.symphony.utils.ImagePreserver
 import io.github.zyrouge.symphony.utils.Logger
 import io.github.zyrouge.symphony.utils.SimplePath
-import me.zyrouge.symphony.metaphony.AudioMetadataParser
 import java.io.FileOutputStream
 import java.math.RoundingMode
 import java.time.LocalDate
@@ -103,82 +102,7 @@ data class Song(
             file: DocumentFileX,
             options: ParseOptions,
         ): Song {
-            if (options.symphony.settings.useMetaphony.value) {
-                try {
-                    val song = parseUsingMetaphony(path, file, options)
-                    if (song != null) {
-                        return song
-                    }
-                } catch (err: Exception) {
-                    Logger.error("Song", "could not parse using metaphony", err)
-                }
-            }
             return parseUsingMediaMetadataRetriever(path, file, options)
-        }
-
-        private fun parseUsingMetaphony(
-            path: SimplePath,
-            file: DocumentFileX,
-            options: ParseOptions,
-        ): Song? {
-            val symphony = options.symphony
-            val metadata = symphony.applicationContext.contentResolver
-                .openFileDescriptor(file.uri, "r")
-                ?.use { AudioMetadataParser.parse(file.name, it.detachFd()) }
-                ?: return null
-            val id = symphony.groove.song.idGenerator.next()
-            val coverFile = metadata.pictures.firstOrNull()?.let {
-                val extension = when (it.mimeType) {
-                    "image/jpg", "image/jpeg" -> "jpg"
-                    "image/png" -> "png"
-                    else -> null
-                }
-                if (extension == null) {
-                    return@let null
-                }
-                val quality = symphony.settings.artworkQuality.value
-                if (quality.maxSide == null) {
-                    val name = "$id.$extension"
-                    symphony.database.artworkCache.get(name).writeBytes(it.data)
-                    return@let name
-                }
-                val bitmap = BitmapFactory.decodeByteArray(it.data, 0, it.data.size)
-                val name = "$id.jpg"
-                FileOutputStream(symphony.database.artworkCache.get(name)).use { writer ->
-                    ImagePreserver
-                        .resize(bitmap, quality)
-                        .compress(Bitmap.CompressFormat.JPEG, 100, writer)
-                }
-                name
-            }
-            metadata.lyrics?.let {
-                symphony.database.lyricsCache.put(id, it)
-            }
-            return Song(
-                id = id,
-                title = metadata.title ?: path.nameWithoutExtension,
-                album = metadata.album,
-                artists = parseMultiValue(metadata.artists, options.artistSeparatorRegex),
-                composers = parseMultiValue(metadata.composers, options.artistSeparatorRegex),
-                albumArtists = parseMultiValue(metadata.albumArtists, options.artistSeparatorRegex),
-                genres = parseMultiValue(metadata.genres, options.genreSeparatorRegex),
-                trackNumber = metadata.trackNumber,
-                trackTotal = metadata.trackTotal,
-                discNumber = metadata.discNumber,
-                discTotal = metadata.discTotal,
-                date = metadata.date,
-                year = metadata.date?.year,
-                duration = metadata.lengthInSeconds?.let { it * 1000L } ?: 0,
-                bitrate = metadata.bitrate?.let { it * 1000L },
-                samplingRate = metadata.sampleRate?.toLong(),
-                channels = metadata.channels,
-                encoder = metadata.encoding,
-                dateModified = file.lastModified,
-                size = file.size,
-                coverFile = coverFile,
-                uri = file.uri,
-                path = path.pathString,
-            )
         }
 
         fun parseUsingMediaMetadataRetriever(

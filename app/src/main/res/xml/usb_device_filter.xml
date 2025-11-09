@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Audiocular D07 - CX31993 DAC -->
+    <!-- Vendor: Synaptics/Conexant (VID: 0x06CB = 1739 decimal) -->
+    <!-- Product: CX31993 (PID: 0x1595 = 5525 decimal) -->
+    <usb-device vendor-id="1739" product-id="5525" />
+</resources>
